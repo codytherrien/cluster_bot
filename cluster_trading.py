@@ -1,4 +1,3 @@
-from typing import final
 import warnings
 warnings.filterwarnings('ignore')
 
