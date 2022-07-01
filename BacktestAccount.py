@@ -254,7 +254,7 @@ class Account:
             sample = np.array([[
                         1,
                         1,
-                        row['Regime'][0],
+                        #row['Regime'][0],
                         row[f'pct_change_{self.time}'][0],
                         row['five_day_mean'][0],
                         row['five_day_var'][0],
@@ -273,7 +273,7 @@ class Account:
             sample = np.array([[
                         0,
                         1,
-                        row['Regime'][0],
+                        #row['Regime'][0],
                         row[f'pct_change_{self.time}'][0],
                         row['five_day_mean'][0],
                         row['five_day_var'][0],
@@ -292,7 +292,7 @@ class Account:
             sample = np.array([[
                         1,
                         0,
-                        row['Regime'][0],
+                        #row['Regime'][0],
                         row[f'pct_change_{self.time}'][0],
                         row['five_day_mean'][0],
                         row['five_day_var'][0],
@@ -311,7 +311,7 @@ class Account:
             sample = np.array([[
                         0,
                         0,
-                        row['Regime'][0],
+                        #row['Regime'][0],
                         row[f'pct_change_{self.time}'][0],
                         row['five_day_mean'][0],
                         row['five_day_var'][0],

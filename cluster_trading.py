@@ -15,6 +15,10 @@ from sklearn.cluster import AgglomerativeClustering
 import BacktestAccount
 import TradeAccount
 
+START_TIME = 13 # set to 5 for local machine 13 for cloud
+END_TIME = 21 # set hour to 13 for local machine 21 for cloud
+
+
 def get_stock_history(stock_list, start_date):
     """
     Generates a dataframe of hostorical stock prices
@@ -47,9 +51,9 @@ def get_stock_history(stock_list, start_date):
 
 def sleeping_stage(api):
     market_close_flag = True
-    while datetime.datetime.now().hour < 4:
+    while datetime.datetime.now().hour < START_TIME - 3:
         time.sleep(7200) # Sleeps for 2 hours
-    while datetime.datetime.now().hour < 13: # set to 5 for local machine 13 for cloud
+    while datetime.datetime.now().hour < START_TIME: # set to 5 for local machine 13 for cloud
         time.sleep(1200) # sleeps for 20 minutes
     while market_close_flag:
         time.sleep(60)
@@ -62,18 +66,18 @@ def sleeping_stage(api):
 
 def find_trades(model, stock_df):
     curr_time = "open"
-    backtest_account = BacktestAccount.Account(100000, curr_time, model) 
+    backtest_account = BacktestAccount.Account(100000, time=curr_time, model=model) 
     hc = AgglomerativeClustering(n_clusters=4, affinity='euclidean', linkage='ward')
-    sample_df = sample_df[~sample_df[[f'pct_change_{curr_time}', 'five_day_mean', 'five_day_var', 'twenty_day_mean', 'twenty_day_var']\
+    stock_df = stock_df[~stock_df[[f'pct_change_{curr_time}', 'five_day_mean', 'five_day_var', 'twenty_day_mean', 'twenty_day_var']\
         ].isin([np.nan, np.inf, -np.inf]).any(1)]
-    sample_df['cluster'] = hc.fit_predict(sample_df[[f'pct_change_{curr_time}', 'five_day_mean']])
-    df_0 = sample_df[sample_df['cluster'] == 0]
+    stock_df['cluster'] = hc.fit_predict(stock_df[[f'pct_change_{curr_time}', 'five_day_mean']])
+    df_0 = stock_df[stock_df['cluster'] == 0]
     df_0.name = 0
-    df_1 = sample_df[sample_df['cluster'] == 1]
+    df_1 = stock_df[stock_df['cluster'] == 1]
     df_1.name = 1
-    df_2 = sample_df[sample_df['cluster'] == 2]
+    df_2 = stock_df[stock_df['cluster'] == 2]
     df_2.name = 2
-    df_3 = sample_df[sample_df['cluster'] == 3]
+    df_3 = stock_df[stock_df['cluster'] == 3]
     df_3.name = 3
 
     tu_cent, td_cent, mru_cent, mrd_cent = find_centers(df_0, df_1, df_2, df_3, time='open')
@@ -93,7 +97,7 @@ def find_trades(model, stock_df):
             #account.set_pos('mrd', mrd_cent, df)
             backtest_account.set_outlier_pos('mrd', tu_cent, td_cent, mru_cent, df)
     
-    backtest_account.make_trades(sample_df)
+    backtest_account.make_trades(stock_df)
 
     positions = {}
     positions['long'] = backtest_account.long_positions.keys()
@@ -162,8 +166,8 @@ def open_positions(trade_account, positions):
         return trade_account
     cash_per_trade = trade_account.curr_cash / num_positions
     for symbol in positions['long']:
-        quote = trade_account.api.get_last_quote(symbol)
-        qty = int(cash_per_trade // quote.askprice)
+        quote = trade_account.api.get_bars(symbol, '1min', limit=1)[0]
+        qty = int(cash_per_trade // quote.c)
         trade_account.api.submit_order(
                 symbol = symbol,
                 qty = qty,
@@ -173,8 +177,8 @@ def open_positions(trade_account, positions):
             )
 
     for symbol in positions['short']:
-        quote = trade_account.api.get_last_quote(symbol)
-        qty = int(cash_per_trade // quote.askprice)
+        quote = trade_account.api.get_bars(symbol, '1min', limit=1)[0]
+        qty = int(cash_per_trade // quote.c)
         trade_account.api.submit_order(
                 symbol = symbol,
                 qty = qty,
@@ -183,22 +187,21 @@ def open_positions(trade_account, positions):
                 time_in_force='gtc'
             )
 
-
-
+    return trade_account
 
 def trade_stage(model, stock_list):
-    last_month = (datetime.date.today() - datetime.timedelta(days=35)).strftime("%m/%d/%Y")
+    last_month = (datetime.date.today() - datetime.timedelta(days=50)).strftime("%m/%d/%Y")
     stock_df = get_stock_history(stock_list, last_month)
     today_df = stock_df.loc[stock_df.index[-1]]
 
     positions = find_trades(model, today_df)
-    trade_account = TradeAccount.Account(stock_df['Symbol'].unique())
+    trade_account = TradeAccount.Account(list(stock_df['ticker'].unique()))
+    trade_account = close_positions(trade_account, positions)
+    positions = trim_positions(trade_account, positions)
+        
+    trade_account = open_positions(trade_account, positions)
 
     while trade_account.market_open_flag:
-        trade_account = close_positions(trade_account, positions)
-        positions = trim_positions(trade_account, positions)
-        
-        trade_account = open_positions(trade_account, positions)
         try:
             minute_bars = trade_account.ws.recv()
         except:
@@ -206,7 +209,7 @@ def trade_stage(model, stock_list):
             trade_account.reconnect()
             minute_bars = trade_account.ws.recv()
 
-        if datetime.datetime.now().hour == 21: # set hour to 13 for local machine 21 for cloud
+        if datetime.datetime.now().hour == END_TIME: # set hour to 13 for local machine 21 for cloud
             trade_account.market_open_flag = False
             #if trade submit trade
 
@@ -221,13 +224,15 @@ def main():
     mid_cap_list = list(mid_cap['Symbol'])
 
     # Training stage
-    last_year = (datetime.date.today() - datetime.timedelta(days=365)).strftime("%m/%d/%Y")
+    last_year = (datetime.date.today() - datetime.timedelta(days=385)).strftime("%m/%d/%Y")
+    print("Getting Stock data")
     mid_cap_df = get_stock_history(mid_cap_list, last_year)
+    print("Training meta label model")
     meta_label_model = gen_meta_label(mid_cap_df)
     
     #################################################################
     api = tradeapi.REST(keys, keys_to_the_vip, paper_products)
-    
+    print("Starting trading stage")
     while datetime.datetime.today().weekday() != 5:
         api = tradeapi.REST(keys, keys_to_the_vip, paper_products)
         sleeping_stage(api)
@@ -236,7 +241,7 @@ def main():
 
         time.sleep(21600) # Sleep for 6 hours
         # Training stage
-        last_year = (datetime.date.today() - datetime.timedelta(days=365)).strftime("%m/%d/%Y")
+        last_year = (datetime.date.today() - datetime.timedelta(days=385)).strftime("%m/%d/%Y")
         mid_cap_df = get_stock_history(mid_cap_list, last_year)
         meta_label_model = gen_meta_label(mid_cap_df)  
 

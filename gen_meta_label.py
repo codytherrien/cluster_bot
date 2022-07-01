@@ -134,6 +134,7 @@ def backtest(multi_stock_df, starting_cash=100000, time='open'):
     time: whether trades are executed at open or close (string: "open" or "close")
     """
     dates = multi_stock_df.index.unique()
+    dates = dates[20:]
     backtest_account = BacktestAccount.Account(starting_cash, time)
 
     for i in range(len(dates)):
@@ -199,7 +200,6 @@ def gen_meta_label(multi_stock_df, starting_cash=100000, time='open'):
 
     trade_history['side'] = trade_history['side'].apply(lambda x: 1 if x =='long' else 0)
     trade_history['type'] = trade_history['type'].apply(lambda x: 1 if x == 'trend' else 0)
-
     X = trade_history[[
         'side',
         'type',
@@ -209,8 +209,7 @@ def gen_meta_label(multi_stock_df, starting_cash=100000, time='open'):
         'twenty_day_mean',
         'twenty_day_var' 
     ]]
-    y = trade_history['win']
-
+    y = trade_history['win'].astype('int')
     weights = {1:1, 0:1}
     model = LogisticRegression(random_state=69, 
         class_weight=weights,
