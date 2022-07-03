@@ -165,7 +165,12 @@ def open_positions(trade_account, positions):
         return trade_account
     cash_per_trade = trade_account.curr_cash / num_positions
     for symbol in positions['long']:
-        quote = trade_account.api.get_bars(symbol, '1min', limit=1)[0]
+        quote = []
+        while len(quote) < 1:
+            try:
+                quote = trade_account.api.get_bars(symbol, '1min', limit=1)[0]
+            except:
+                pass
         qty = int(cash_per_trade // quote.c)
         trade_account.api.submit_order(
                 symbol = symbol,
