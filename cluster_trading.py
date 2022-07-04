@@ -170,7 +170,7 @@ def open_positions(trade_account, positions):
             try:
                 quote = trade_account.api.get_bars(symbol, '1min', limit=1)[0]
             except:
-                pass
+                trade_account.reconnect()
         qty = int(cash_per_trade // quote.c)
         trade_account.api.submit_order(
                 symbol = symbol,
