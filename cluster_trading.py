@@ -135,22 +135,23 @@ def close_positions(trade_account, positions):
     trade_account.reconnect()
     portfolio = trade_account.api.list_positions()
     for position in portfolio:
-        if position.symbol in positions['long'] and position.qty > 0:
+        qty = int(position.qty)
+        if position.symbol in positions['long'] and qty > 0:
             continue
-        elif position.qty > 0:
+        elif qty > 0:
             trade_account.api.submit_order(
                 symbol = position.symbol,
-                qty = position.qty,
+                qty = qty,
                 side = 'sell',
                 type = 'market',
                 time_in_force='gtc'
             )
-        elif position.symbol in positions['short'] and position.qty < 0:
+        elif position.symbol in positions['short'] and qty < 0:
             continue
-        elif position.qty < 0:
+        elif qty < 0:
             trade_account.api.submit_order(
                 symbol = position.symbol,
-                qty = position.qty,
+                qty = qty,
                 side = 'buy',
                 type = 'market',
                 time_in_force='gtc'
