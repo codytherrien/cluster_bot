@@ -151,7 +151,7 @@ def close_positions(trade_account, positions):
         elif qty < 0:
             trade_account.api.submit_order(
                 symbol = position.symbol,
-                qty = qty,
+                qty = abs(qty),
                 side = 'buy',
                 type = 'market',
                 time_in_force='gtc'
