@@ -43,7 +43,7 @@ def get_stock_history(stock_list, start_date):
             multi_stock_df = pd.concat([multi_stock_df, stock_history[ticker]])
         else:
             multi_stock_df = stock_history[ticker]
-    multi_stock_df.set_index('date', inplace=True)
+    multi_stock_df.set_index('Date', inplace=True)
     multi_stock_df.sort_index(inplace=True)
     
     return multi_stock_df
