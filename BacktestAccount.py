@@ -120,7 +120,7 @@ class Account:
         remove = []
         for sym in self.long_positions:
             if sym not in new_pos:
-                exit_price = day_df[day_df['ticker'] == sym]['open'][0]
+                exit_price = day_df[day_df['ticker'] == sym]['Open'][0]
                 entry_date, num_shares, entrance_price = self.long_positions[sym]
                 self.curr_cash += exit_price*num_shares - self.transaction_fee
                 self.trade_history['exit_price'].mask((self.trade_history['entry_date'] == entry_date) \
@@ -149,7 +149,7 @@ class Account:
         for sym in self.short_positions:
             if sym not in new_pos:
                 entry_date, num_shares, entrance_price = self.short_positions[sym]
-                exit_price = day_df[day_df['ticker'] == sym]['open'][0]
+                exit_price = day_df[day_df['ticker'] == sym]['Open'][0]
                 entrance_val = entrance_price*num_shares
                 delta = (entrance_price-exit_price)*num_shares
                 self.curr_cash += entrance_val + delta - self.transaction_fee
@@ -178,14 +178,14 @@ class Account:
         for sym in long_pos:
             if sym not in self.long_positions.keys():
                 row = day_df[day_df['ticker'] == sym]
-                share_price = row['open'][0]
+                share_price = row['Open'][0]
                 num_shares = self.val_per_pos // share_price
                 self.curr_cash -= share_price*num_shares - self.transaction_fee
                 self.long_positions[sym] = (row.index[0], num_shares, share_price)
                 new_row = {
                     'entry_date': row.index[0], 
                     'ticker': row['ticker'][0], 
-                    'entry_price': row['open'][0], 
+                    'entry_price': row['Open'][0], 
                     'side': 'long',
                     'type': trade_type, 
                     f'pct_change_{self.time}': row[f'pct_change_{self.time}'][0],
@@ -209,14 +209,14 @@ class Account:
         for sym in short_pos:
             if sym not in self.short_positions.keys():
                 row = day_df[day_df['ticker'] == sym]
-                share_price = row['open'][0]
+                share_price = row['Open'][0]
                 num_shares = self.val_per_pos // share_price
                 self.curr_cash -= share_price*num_shares - self.transaction_fee
                 self.short_positions[sym] = (row.index[0], num_shares, share_price)
                 new_row = {
                     'entry_date': row.index[0], 
                     'ticker': row['ticker'][0], 
-                    'entry_price': row['open'][0], 
+                    'entry_price': row['Open'][0], 
                     'side': 'short',
                     'type': trade_type, 
                     f'pct_change_{self.time}': row[f'pct_change_{self.time}'][0],

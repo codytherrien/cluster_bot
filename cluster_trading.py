@@ -14,8 +14,8 @@ from sklearn.cluster import AgglomerativeClustering
 import BacktestAccount
 import TradeAccount
 
-START_TIME = 13 # set to 5 for local machine 13 for cloud
-END_TIME = 21 # set hour to 13 for local machine 21 for cloud
+START_TIME = 5 # set to 5 for local machine 13 for cloud
+END_TIME = 13 # set hour to 13 for local machine 21 for cloud
 
 
 def get_stock_history(stock_list, start_date):
@@ -26,7 +26,8 @@ def get_stock_history(stock_list, start_date):
     stock_history = {}
     for ticker in stock_list:
         try:
-            stock_history[ticker] = yf.Ticker(ticker).history(start_date=start_date, index_as_date = False, interval="1d")
+            stock_history[ticker] = yf.Ticker(ticker).history(start=start_date, interval="1d")
+            stock_history[ticker]['ticker'] = ticker
         except:
             pass
     
@@ -197,7 +198,7 @@ def open_positions(trade_account, positions):
 
 def trade_stage(model, stock_list):
     time.sleep(900) # sleeping to wait 15 min delay at open for yfinance data
-    last_month = (datetime.date.today() - datetime.timedelta(days=50)).strftime("%m/%d/%Y")
+    last_month = (datetime.date.today() - datetime.timedelta(days=50)).strftime("%Y-%m-%d")
     stock_df = get_stock_history(stock_list, last_month)
     today_df = stock_df.loc[stock_df.index[-1]]
 
@@ -231,7 +232,7 @@ def main():
     mid_cap_list = list(mid_cap['Symbol'])
 
     # Training stage
-    last_year = (datetime.date.today() - datetime.timedelta(days=385)).strftime("%m/%d/%Y")
+    last_year = (datetime.date.today() - datetime.timedelta(days=385)).strftime("%Y-%m-%d")
     print("Getting Stock data")
     mid_cap_df = get_stock_history(mid_cap_list, last_year)
     print("Training meta label model")
@@ -248,7 +249,7 @@ def main():
 
         time.sleep(21600) # Sleep for 6 hours
         # Training stage
-        last_year = (datetime.date.today() - datetime.timedelta(days=385)).strftime("%m/%d/%Y")
+        last_year = (datetime.date.today() - datetime.timedelta(days=385)).strftime("%Y-%m-%d")
         mid_cap_df = get_stock_history(mid_cap_list, last_year)
         meta_label_model = gen_meta_label(mid_cap_df)  
 

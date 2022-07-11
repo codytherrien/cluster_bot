@@ -133,8 +133,11 @@ def backtest(multi_stock_df, starting_cash=100000, time='open'):
     starting_cash: starting value of trading account (float)
     time: whether trades are executed at open or close (string: "open" or "close")
     """
+    print("Multistock df: ")
+    print(multi_stock_df)
     dates = multi_stock_df.index.unique()
     dates = dates[20:]
+    print(dates)
     backtest_account = BacktestAccount.Account(starting_cash, time)
 
     for i in range(len(dates)):
