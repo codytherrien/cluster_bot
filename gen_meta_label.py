@@ -182,7 +182,7 @@ def backtest(multi_stock_df, starting_cash=100000, time='open'):
             backtest_account.make_trades(sample_df)
             #backtest_account.update_value(sample_df, sp_500_df.loc[dates[i]])
 
-    backtest_account.close_positions(multi_stock_df.loc[dates[i]])
+    backtest_account.close_positions(multi_stock_df.loc[dates[-1]])
 
     return backtest_account.trade_history
 
