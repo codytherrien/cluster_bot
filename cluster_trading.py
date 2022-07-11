@@ -5,7 +5,7 @@ import sys
 import alpaca_trade_api as tradeapi
 from street_cred import *
 import datetime
-import yahoo_fin.stock_info as si
+import yfinance as yf
 import pandas as pd
 from gen_meta_label import gen_meta_label, find_centers
 import time
@@ -26,7 +26,7 @@ def get_stock_history(stock_list, start_date):
     stock_history = {}
     for ticker in stock_list:
         try:
-            stock_history[ticker] = si.get_data(ticker, start_date=start_date, index_as_date = False, interval="1d")
+            stock_history[ticker] = yf.Ticker(ticker).history(start_date=start_date, index_as_date = False, interval="1d")
         except:
             pass
     
@@ -196,6 +196,7 @@ def open_positions(trade_account, positions):
     return trade_account
 
 def trade_stage(model, stock_list):
+    time.sleep(900) # sleeping to wait 15 min delay at open for yfinance data
     last_month = (datetime.date.today() - datetime.timedelta(days=50)).strftime("%m/%d/%Y")
     stock_df = get_stock_history(stock_list, last_month)
     today_df = stock_df.loc[stock_df.index[-1]]
