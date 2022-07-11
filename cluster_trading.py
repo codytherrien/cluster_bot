@@ -31,7 +31,7 @@ def get_stock_history(stock_list, start_date):
             pass
     
     for ticker in stock_history:
-        stock_history[ticker]['pct_change_open'] = stock_history[ticker]['open'].pct_change()
+        stock_history[ticker]['pct_change_open'] = stock_history[ticker]['Open'].pct_change()
         stock_history[ticker]['five_day_mean'] = stock_history[ticker]['pct_change_open'].rolling(5).mean()
         stock_history[ticker]['five_day_var'] = stock_history[ticker]['pct_change_open'].rolling(5).var()
         stock_history[ticker]['twenty_day_mean'] = stock_history[ticker]['pct_change_open'].rolling(20).mean()
