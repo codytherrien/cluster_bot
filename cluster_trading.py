@@ -14,8 +14,8 @@ from sklearn.cluster import AgglomerativeClustering
 import BacktestAccount
 import TradeAccount
 
-START_TIME = 5 # set to 5 for local machine 13 for cloud
-END_TIME = 13 # set hour to 13 for local machine 21 for cloud
+START_TIME = 13 # set to 5 for local machine 13 for cloud
+END_TIME = 21 # set hour to 13 for local machine 21 for cloud
 
 
 def get_stock_history(stock_list, start_date):
@@ -243,8 +243,9 @@ def main():
     print("Starting trading stage")
     while datetime.datetime.today().weekday() != 5:
         api = tradeapi.REST(keys, keys_to_the_vip, paper_products)
+        print("Starting sleep stage")
         sleeping_stage(api)
-    
+        print('Start of trading day: ', datetime.datetime.today().weekday())
         trade_stage(meta_label_model, mid_cap_list)
         print("End of day")
 
