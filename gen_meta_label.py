@@ -136,7 +136,7 @@ def backtest(multi_stock_df, starting_cash=100000, time='open'):
     print("Multistock df: ")
     print(multi_stock_df)
     dates = multi_stock_df.index.unique()
-    dates = dates[20:]
+    dates = dates[22:] # removing dates with NAN values
     print(dates)
     backtest_account = BacktestAccount.Account(starting_cash, time)
 
