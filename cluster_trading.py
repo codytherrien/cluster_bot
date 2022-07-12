@@ -246,6 +246,7 @@ def main():
         sleeping_stage(api)
     
         trade_stage(meta_label_model, mid_cap_list)
+        print("End of day")
 
         time.sleep(21600) # Sleep for 6 hours
         # Training stage
