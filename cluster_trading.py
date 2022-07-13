@@ -199,10 +199,16 @@ def open_positions(trade_account, positions):
 def trade_stage(model, stock_list):
     time.sleep(900) # sleeping to wait 15 min delay at open for yfinance data
     last_month = (datetime.date.today() - datetime.timedelta(days=50)).strftime("%Y-%m-%d")
-    stock_df = get_stock_history(stock_list, last_month)
-    today_df = stock_df.loc[stock_df.index[-1]]
-
-    positions = find_trades(model, today_df)
+    try:
+        stock_df = get_stock_history(stock_list, last_month)
+        today_df = stock_df.loc[stock_df.index[-1]]
+        positions = find_trades(model, today_df)
+    except:
+        time.sleep(60)
+        stock_df = get_stock_history(stock_list, last_month)
+        today_df = stock_df.loc[stock_df.index[-1]]
+        positions = find_trades(model, today_df)
+        
     trade_account = TradeAccount.Account(list(stock_df['ticker'].unique()))
     trade_account = close_positions(trade_account, positions)
     positions = trim_positions(trade_account, positions)
