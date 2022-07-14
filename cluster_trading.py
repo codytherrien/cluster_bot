@@ -109,7 +109,7 @@ def trim_positions(trade_account, positions):
     portfolio = trade_account.api.list_positions()
     portfolio_dict = {}
     for position in portfolio:
-        portfolio_dict[position.symbol] = position.qty
+        portfolio_dict[position.symbol] = int(position.qty)
     
     final_positions = {}
     final_positions['long'] = []
@@ -208,7 +208,7 @@ def trade_stage(model, stock_list):
         stock_df = get_stock_history(stock_list, last_month)
         today_df = stock_df.loc[stock_df.index[-1]]
         positions = find_trades(model, today_df)
-        
+
     trade_account = TradeAccount.Account(list(stock_df['ticker'].unique()))
     trade_account = close_positions(trade_account, positions)
     positions = trim_positions(trade_account, positions)
