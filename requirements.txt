@@ -1,0 +1,9 @@
+pandas
+numpy
+yahoo-fin
+scikit-learn
+matplotlib
+xgboost
+alpaca-trade-api
+yfinance
+websocket-client
